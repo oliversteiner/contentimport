@@ -110,7 +110,7 @@ class ContentImport extends ConfigFormBase {
     if (!isset($vocabularies[$vid])) {
         ContentImport::createVoc($vid, $voc);       
     }
-    $termArray = split(',', $terms);
+    $termArray = explode(',', $terms);
     $termIds =[];
     foreach($termArray AS $term){            
        $term_id = ContentImport::getTermId($term, $vid);     
@@ -213,7 +213,7 @@ class ContentImport extends ConfigFormBase {
                   }
                   break;
                 case 'entity_reference':
-                  $reference = split(":", $data[$keyIndex[$fieldNames[$type]]]);
+                  $reference = explode(":", $data[$keyIndex[$fieldNames[$type]]]);
                   $terms= ContentImport::getTermReference($reference[0], $reference[1]);                 
                   $nodeArray[$fieldNames[$type]] = $terms;
                   break;
@@ -238,7 +238,5 @@ class ContentImport extends ConfigFormBase {
       exit;
     }
     }
-  }
-
- 
+  } 
 }
