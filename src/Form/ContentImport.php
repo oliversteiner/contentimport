@@ -283,6 +283,7 @@ class ContentImport extends ConfigFormBase {
             }
             $nodeArray['type'] = strtolower($contentType);
             $nodeArray['uid'] = 1;
+            $nodeArray['promote'] = 0;
             if($nodeArray['title']['value'] != ''){
               $node = Node::create($nodeArray);
               $node->save();
