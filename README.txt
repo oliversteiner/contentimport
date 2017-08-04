@@ -52,10 +52,19 @@ Field Mapping:
 
 For Image field - upload all the images 
 	in public://<content_type>/images/ folder before importing 
-	the CSV file(IMCE module will be helpful for this)
+	the CSV file(IMCE module will be helpful for this).
 
 For Entity Reference field(Taxonomy) - put the data as Vocabulary: term1, term2
-	If the Vocabulary or Term is not exists it will create automatically
+	If the Vocabulary or Term is not exists it will create automatically.
+
+For Entity Reference field(Users) - put the user's email address comma seperated
+	If the User is not exists it will create automatically.
+
+For Boolean field - Put On/Yes to check the field and Off/No to uncheck the field.
+
+For Date field - Put the data in m/d/Y h:m:i format
+
+For Timestamp field - Put the timestamp, the system will convert and store the date.
 
 Check the attached CSV file for Sample.
 

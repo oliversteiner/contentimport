@@ -9,13 +9,16 @@ namespace Drupal\contentimport\Form;
 
 use Drupal\contentimport\Controller\ContentImportController;
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\Form;
+use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\user\Entity\User;
 
 /**
  * Configure Content Import settings for this site.
@@ -92,6 +95,7 @@ class ContentImport extends ConfigFormBase {
       if (!empty($field_definition->getTargetBundle())) {
         $fields['name'][] = $field_definition->getName();
         $fields['type'][] = $field_definition->getType();
+        $fields['setting'][] = $field_definition->getSettings();
       }
     }
     return $fields;
@@ -163,6 +167,35 @@ class ContentImport extends ConfigFormBase {
   }
 
   /**
+   * To get user information based on emailIds
+   */
+  public static function getUserInfo($userArray) {
+      $uids = [];
+      foreach($userArray AS $usermail){
+        $users = \Drupal::entityTypeManager()->getStorage('user')
+        ->loadByProperties(['mail' => $usermail]);
+        $user = reset($users);
+        if ($user) {
+          $uids[] = $user->id();         
+        }else{
+          $user = \Drupal\user\Entity\User::create();
+          $user->uid = '';
+          $user->setUsername($usermail);
+          $user->setEmail($usermail);
+          $user->set("init", $usermail);
+          $user->enforceIsNew();
+          $user->activate();
+          $user->save();
+
+          $users = \Drupal::entityTypeManager()->getStorage('user')
+            ->loadByProperties(['mail' => $usermail]);
+          $uids[] = $user->id();
+        }
+      }
+    return $uids;   
+  }
+
+  /**
    * To import data as Content type nodes.
   */
 
@@ -176,6 +209,7 @@ class ContentImport extends ConfigFormBase {
     $fields = ContentImport::getFields($contentType);
     $fieldNames = $fields['name'];
     $fieldTypes = $fields['type'];
+    $fieldSettings = $fields['setting'];
     $files = glob('sites/default/files/'.$contentType.'/images/*.*');
     $images = [];
     foreach ($files as $file_name) {
@@ -193,6 +227,7 @@ class ContentImport extends ConfigFormBase {
             $index++;
             if ($index < 2) {
               array_push($fieldNames,'title');
+              array_push($fieldTypes,'text');
               foreach($fieldNames AS $fieldValues){
                 $i = 0;
                 foreach($data AS $dataValues){
@@ -204,33 +239,54 @@ class ContentImport extends ConfigFormBase {
               }  
               continue;
             }
-            $type = 0;
+           
             for($f = 0 ; $f < count($fieldNames) ; $f++ ){
-              switch($fieldTypes[$type]){
+              switch($fieldTypes[$f]) {
                 case 'image':                 
-                  if (!empty($images[$data[$keyIndex[$fieldNames[$type]]]])) {
-                    $nodeArray[$fieldNames[$type]] = array(array('target_id' => $images[$data[$keyIndex[$fieldNames[$type]]]]->id()));
+                  if (!empty($images[$data[$keyIndex[$fieldNames[$f]]]])) {
+                    $nodeArray[$fieldNames[$f]] = array(array('target_id' => $images[$data[$keyIndex[$fieldNames[$f]]]]->id()));
                   }
                   break;
                 case 'entity_reference':
-                  $reference = explode(":", $data[$keyIndex[$fieldNames[$type]]]);
-                  $terms= ContentImport::getTermReference($reference[0], $reference[1]);                 
-                  $nodeArray[$fieldNames[$type]] = $terms;
+                    if($fieldSettings[$f]['target_type'] == 'taxonomy_term'){
+                      $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);                  
+                      if(is_array($reference) && $reference[0] != ''){
+                        $terms= ContentImport::getTermReference($reference[0], $reference[1]);                 
+                        $nodeArray[$fieldNames[$f]] = $terms;
+                      }
+                    }else if($fieldSettings[$f]['target_type'] == 'user'){
+                      $userArray = explode(', ', $data[$keyIndex[$fieldNames[$f]]]);
+                      $users = ContentImport::getUserInfo($userArray);
+                      $nodeArray[$fieldNames[$f]] = $users;
+                    }
                   break;
                 case 'text_with_summary':
-                  $nodeArray[$fieldNames[$type]] = ['value' => $data[$keyIndex[$fieldNames[$type]]], 'format' => 'full_html'];
+                case 'text_long':
+                case 'text':
+                  $nodeArray[$fieldNames[$f]] = ['value' => $data[$keyIndex[$fieldNames[$f]]], 'format' => 'full_html'];
+                  break;
+                case 'datetime':
+                  $dateTime = \DateTime::createFromFormat('Y-m-d h:i:s', $data[$keyIndex[$fieldNames[$f]]]);
+                  $newDateString = $dateTime->format('Y-m-d\Th:i:s');
+                  $nodeArray[$fieldNames[$f]] = ["value" => $newDateString];
+                  break;
+                case 'timestamp':
+                  $nodeArray[$fieldNames[$f]] = ["value" => $data[$keyIndex[$fieldNames[$f]]]];
+                  break;
+                case 'boolean':
+                  $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] == 'On' || $data[$keyIndex[$fieldNames[$f]]] == 'Yes') ? 1 : 0 ;
                   break;
                 default:
-                  $nodeArray[$fieldNames[$type]] = $data[$keyIndex[$fieldNames[$type]]];
+                  $nodeArray[$fieldNames[$f]] = $data[$keyIndex[$fieldNames[$f]]];
                   break;
-              }
-              $type++;
+              }             
             }
             $nodeArray['type'] = strtolower($contentType);
             $nodeArray['uid'] = 1;
-            $node = \Drupal\node\Entity\Node::create($nodeArray);
-            $node->save();
-
+            if($nodeArray['title']['value'] != ''){
+              $node = Node::create($nodeArray);
+              $node->save();
+            }            
       }
       fclose($handle);
       $url = $base_url."/admin/content";
