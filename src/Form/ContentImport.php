@@ -228,6 +228,8 @@ class ContentImport extends ConfigFormBase {
             if ($index < 2) {
               array_push($fieldNames,'title');
               array_push($fieldTypes,'text');
+              array_push($fieldNames,'langcode');
+              array_push($fieldTypes,'lang');
               foreach($fieldNames AS $fieldValues){
                 $i = 0;
                 foreach($data AS $dataValues){
@@ -239,7 +241,12 @@ class ContentImport extends ConfigFormBase {
               }  
               continue;
             }
-           
+            if(!isset($keyIndex['title']) || !isset($keyIndex['langcode'])){
+              drupal_set_message(t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
+              $url = $base_url."/admin/config/content/contentimport";
+              header('Location:'.$url);
+              exit;
+            }
             for($f = 0 ; $f < count($fieldNames) ; $f++ ){
               switch($fieldTypes[$f]) {
                 case 'image':                 
@@ -276,6 +283,8 @@ class ContentImport extends ConfigFormBase {
                 case 'boolean':
                   $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] == 'On' || $data[$keyIndex[$fieldNames[$f]]] == 'Yes') ? 1 : 0 ;
                   break;
+                case 'langcode':
+                  $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] != '') ? $data[$keyIndex[$fieldNames[$f]]]: 'en';
                 default:
                   $nodeArray[$fieldNames[$f]] = $data[$keyIndex[$fieldNames[$f]]];
                   break;
@@ -284,6 +293,7 @@ class ContentImport extends ConfigFormBase {
             $nodeArray['type'] = strtolower($contentType);
             $nodeArray['uid'] = 1;
             $nodeArray['promote'] = 0;
+            $nodeArray['sticky'] = 0;            
             if($nodeArray['title']['value'] != ''){
               $node = Node::create($nodeArray);
               $node->save();
