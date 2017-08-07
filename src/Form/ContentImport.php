@@ -218,8 +218,8 @@ class ContentImport extends ConfigFormBase {
       $image->save();
       $images[basename($file_name)] = $image;   
     }
-
-    if($mimetype == "text/plain"){ //Code for import csv file
+     
+    if($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv'){ //Code for import csv file
       if (($handle = fopen($location, "r")) !== FALSE) {
           $nodeData = []; $keyIndex = [];
           $index = 0;
