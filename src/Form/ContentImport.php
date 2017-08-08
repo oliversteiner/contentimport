@@ -18,9 +18,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure Content Import settings for this site.
-**/
+ */
 
-class ContentImport extends ConfigFormBase { 
+class ContentImport extends ConfigFormBase {
 
   public function getFormID() {
     return 'contentimport';
@@ -297,11 +297,12 @@ class ContentImport extends ConfigFormBase {
               $node->save();
             }            
       }
-      fclose($handle);
-      $url = $base_url."/admin/content";
-      header('Location:'.$url);
-      exit;
+        fclose($handle);
+        $url = $base_url . "/admin/content";
+        header('Location:' . $url);
+        exit;
+      }
     }
-    }
-  } 
+  }
+
 }
