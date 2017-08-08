@@ -14,6 +14,7 @@ use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure Content Import settings for this site.
@@ -70,7 +71,6 @@ class ContentImport extends ConfigFormBase {
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $contentType= $form_state->getValue('contentimport_contenttype');    
-    $form_state_values = $form_state->getValues();
     $csvFile = $form_state->getValue('file_upload');
     $file = File::load( $csvFile[0] );
     $file->setPermanent();
@@ -86,7 +86,7 @@ class ContentImport extends ConfigFormBase {
     $entityManager = \Drupal::service('entity.manager');
     $fields = []; 
     foreach (\Drupal::entityManager()
-         ->getFieldDefinitions('node', $contentType) as $field_name => $field_definition) {
+         ->getFieldDefinitions('node', $contentType) AS $field_definition) {
       if (!empty($field_definition->getTargetBundle())) {
         $fields['name'][] = $field_definition->getName();
         $fields['type'][] = $field_definition->getType();
@@ -218,7 +218,7 @@ class ContentImport extends ConfigFormBase {
      
     if($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv'){ //Code for import csv file
       if (($handle = fopen($location, "r")) !== FALSE) {
-          $nodeData = []; $keyIndex = [];
+          $keyIndex = [];
           $index = 0;
           while (($data = fgetcsv($handle)) !== FALSE) { 
             $index++;
@@ -240,7 +240,7 @@ class ContentImport extends ConfigFormBase {
             }
    
             if(!isset($keyIndex['title']) || !isset($keyIndex['langcode'])){
-              drupal_set_message(t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
+              drupal_set_message($this->t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
               $url = $base_url."/admin/config/content/contentimport";
               header('Location:'.$url);
               exit;
