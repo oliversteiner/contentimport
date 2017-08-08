@@ -9,5 +9,6 @@
             "homepage": "https://www.drupal.org/u/dhayanandan_k",
             "role": "Maintainer"
         },        
-    ]
+    ],
+    "minimum-stability": "dev",
 }
