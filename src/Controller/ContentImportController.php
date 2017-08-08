@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Contains \Drupal\contentimport\src\Controller\ContentImportController.
- */
-
 namespace Drupal\contentimport\Controller;
 
 use Drupal\Core\Controller\ControllerBase;

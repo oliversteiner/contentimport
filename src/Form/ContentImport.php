@@ -159,8 +159,8 @@ class ContentImport extends ConfigFormBase {
     foreach ($userArray as $usermail) {
       $users = \Drupal::entityTypeManager()->getStorage('user')
         ->loadByProperties([
-            'mail' => $usermail,
-          ]);
+          'mail' => $usermail,
+        ]);
       $user = reset($users);
       if ($user) {
         $uids[] = $user->id();

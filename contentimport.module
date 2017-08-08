@@ -6,8 +6,7 @@
  */
 
 /**
- * Implements contentimport_preprocess_page(). 
- * Used to add css and js library to content import page.
+ * Implements contentimport_preprocess_page().
  */
 function contentimport_preprocess_page(&$variables) {
   $variables['page']['#cache']['contexts'][] = 'route';
