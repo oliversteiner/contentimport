@@ -107,7 +107,7 @@ class ContentImport extends ConfigFormBase {
     $vocabularies = Vocabulary::loadMultiple();
     /* Create Vocabulary if it is not exists */
     if (!isset($vocabularies[$vid])) {
-      ContentImport::createVoc($vid, $voc);   
+      ContentImport::createVoc($vid, $voc);
     }
     $termArray = explode(',', $terms);
     $termIds = [];
@@ -162,12 +162,12 @@ class ContentImport extends ConfigFormBase {
    */
   public static function getUserInfo($userArray) {
     $uids = [];
-    foreach($userArray AS $usermail){
+    foreach ($userArray as $usermail) {
       $users = \Drupal::entityTypeManager()->getStorage('user')
       ->loadByProperties(['mail' => $usermail]);
       $user = reset($users);
       if ($user) {
-        $uids[] = $user->id();   
+        $uids[] = $user->id();
       }else {
         $user = \Drupal\user\Entity\User::create();
         $user->uid = '';
@@ -191,8 +191,8 @@ class ContentImport extends ConfigFormBase {
   public function createNode($contentType) {
     global $base_url;
     $loc = db_query('SELECT file_managed.uri FROM file_managed ORDER BY file_managed.fid DESC limit 1', []);
-    foreach($loc as $val) {
-      $location = $val->uri; // To get location of the csv file imported
+    foreach ($loc as $val) {
+      $location = $val->uri;
     }
     $mimetype = mime_content_type($location);
     $fields = ContentImport::getFields($contentType);
@@ -219,7 +219,7 @@ class ContentImport extends ConfigFormBase {
             array_push($fieldNames, 'title');
             array_push($fieldTypes, 'text');
             array_push($fieldNames, 'langcode');
-            array_push($fieldTypes, 'lang');   
+            array_push($fieldTypes, 'lang');
             foreach ($fieldNames as $fieldValues) {
               $i = 0;
               foreach ($data as $dataValues) {
@@ -237,9 +237,9 @@ class ContentImport extends ConfigFormBase {
             header('Location:' . $url);
             exit;
           }
-          for($f = 0; $f < count($fieldNames); $f++) {
-            switch($fieldTypes[$f]) {
-              case 'image':                 
+          for ($f = 0; $f < count($fieldNames); $f++) {
+            switch ($fieldTypes[$f]) {
+              case 'image':          
                 if (!empty($images[$data[$keyIndex[$fieldNames[$f]]]])) {
                   $nodeArray[$fieldNames[$f]] = [['target_id' => $images[$data[$keyIndex[$fieldNames[$f]]]]->id()]];
                 }
@@ -247,15 +247,15 @@ class ContentImport extends ConfigFormBase {
 
               case 'entity_reference':
                 if ($fieldSettings[$f]['target_type'] == 'taxonomy_term') {
-                  $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);     
+                  $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);    
                   if (is_array($reference) && $reference[0] != '') {
-                    $terms = ContentImport::getTermReference($reference[0], $reference[1]);          
+                    $terms = ContentImport::getTermReference($reference[0], $reference[1]);    
                     $nodeArray[$fieldNames[$f]] = $terms;
                   }
                 }elseif ($fieldSettings[$f]['target_type'] == 'user') {
-                    $userArray = explode(', ', $data[$keyIndex[$fieldNames[$f]]]);
-                    $users = ContentImport::getUserInfo($userArray);
-                    $nodeArray[$fieldNames[$f]] = $users;
+                  $userArray = explode(', ', $data[$keyIndex[$fieldNames[$f]]]);
+                  $users = ContentImport::getUserInfo($userArray);
+                  $nodeArray[$fieldNames[$f]] = $users;
                 }
                 break;
 
@@ -276,7 +276,7 @@ class ContentImport extends ConfigFormBase {
                 break;
 
               case 'boolean':
-                $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] == 'On' || $data[$keyIndex[$fieldNames[$f]]] == 'Yes') ? 1 : 0 ;
+                $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] == 'On' || $data[$keyIndex[$fieldNames[$f]]] == 'Yes') ? 1 : 0;
                 break;
 
               case 'langcode':
