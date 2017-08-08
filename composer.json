@@ -1,5 +1,13 @@
 {
     "name": "drupal/contentimport",
     "description": "The simple drupal module to import data from CSV to any contenttype",
-    "type": "drupal-module"
+    "type": "drupal-module",
+    "homepage": "https://drupal.org/project/contentimport",
+    "authors": [
+        {
+            "name": "Dhayanandan",
+            "homepage": "https://www.drupal.org/u/dhayanandan_k",
+            "role": "Maintainer"
+        },        
+    ]
 }
