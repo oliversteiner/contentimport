@@ -19,9 +19,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Configure Content Import settings for this site.
  */
-
 class ContentImport extends ConfigFormBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getFormId() {
     return 'contentimport';
   }
@@ -29,7 +31,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-
   protected function getEditableConfigNames() {
     return [
       'contentimport.settings',
@@ -39,7 +40,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * Content Import Form.
    */
-
   public function buildForm(array $form, FormStateInterface $form_state) {
     $contentTypes = ContentImportController::getAllContentTypes();
     $selected = 0;
@@ -70,9 +70,8 @@ class ContentImport extends ConfigFormBase {
   }
 
   /**
-  * Content Import Form Submission.
-  */
-
+   * Content Import Form Submission.
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $contentType = $form_state->getValue('contentimport_contenttype');
     $csvFile = $form_state->getValue('file_upload');
@@ -85,7 +84,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * To get all Content Type Fields.
    */
-
   public function getFields($contentType) {
     $entityManager = \Drupal::service('entity.manager');
     $fields = [];
@@ -100,10 +98,9 @@ class ContentImport extends ConfigFormBase {
     return $fields;
   }
 
-   /**
-    * To get Reference field ids.
-    */
-
+  /**
+   * To get Reference field ids.
+   */
   public function getTermReference($voc, $terms) {
     $vocName = strtolower($voc);
     $vid = preg_replace('@[^a-z0-9_]+@', '_', $vocName);
@@ -114,10 +111,10 @@ class ContentImport extends ConfigFormBase {
     }
     $termArray = explode(',', $terms);
     $termIds = [];
-    foreach($termArray AS $term){    
+    foreach ($termArray as $term) {
        $term_id = ContentImport::getTermId($term, $vid);
       if (empty($term_id)) {
-        $term_id = ContentImport::createTerm($voc, $term, $vid); 
+        $term_id = ContentImport::createTerm($voc, $term, $vid);
       }
       $termIds[]['target_id'] = $term_id;
     }
@@ -127,7 +124,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * To Create Terms if it is not available.
    */
-
   public function createVoc($vid, $voc) {
     $vocabulary = \Drupal\taxonomy\Entity\Vocabulary::create([
       'vid' => $vid,
@@ -140,7 +136,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * To Create Terms if it is not available.
    */
-
   public function createTerm($voc, $term, $vid) {
     Term::create([
       'parent' => [$voc],
@@ -154,10 +149,9 @@ class ContentImport extends ConfigFormBase {
   /**
    * To get Termid available.
    */
-
   public function getTermId($term, $vid) {
     $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', [':uid' =>  $term, ':vid' => $vid]);
-    foreach($termRes as $val){
+    foreach ($termRes as $val){
       $term_id = $val->tid;
     }
     return $term_id;
@@ -166,7 +160,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * To get user information based on emailIds.
    */
-
   public static function getUserInfo($userArray) {
     $uids = [];
     foreach($userArray AS $usermail){
@@ -195,7 +188,6 @@ class ContentImport extends ConfigFormBase {
   /**
    * To import data as Content type nodes.
    */
-
   public function createNode($contentType) {
     global $base_url;
     $loc = db_query('SELECT file_managed.uri FROM file_managed ORDER BY file_managed.fid DESC limit 1', []);
@@ -217,7 +209,6 @@ class ContentImport extends ConfigFormBase {
     }
 
     // Code for import csv file.
-
     if ($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv') {
       if (($handle = fopen($location, "r")) !== FALSE) {
         $keyIndex = [];
