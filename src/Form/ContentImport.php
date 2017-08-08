@@ -70,9 +70,9 @@ class ContentImport extends ConfigFormBase {
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $contentType= $form_state->getValue('contentimport_contenttype');    
+    $contentType = $form_state->getValue('contentimport_contenttype');
     $csvFile = $form_state->getValue('file_upload');
-    $file = File::load( $csvFile[0] );
+    $file = File::load($csvFile[0]);
     $file->setPermanent();
     $file->save();
     ContentImport::createNode($contentType);
@@ -80,13 +80,13 @@ class ContentImport extends ConfigFormBase {
 
   /**
    * To get all Content Type Fields.
-  */
+   */
 
   public function getFields($contentType) {
     $entityManager = \Drupal::service('entity.manager');
-    $fields = []; 
+    $fields = [];
     foreach (\Drupal::entityManager()
-         ->getFieldDefinitions('node', $contentType) AS $field_definition) {
+      ->getFieldDefinitions('node', $contentType) as $field_definition) {
       if (!empty($field_definition->getTargetBundle())) {
         $fields['name'][] = $field_definition->getName();
         $fields['type'][] = $field_definition->getType();
@@ -96,21 +96,20 @@ class ContentImport extends ConfigFormBase {
     return $fields;
   }
   
-  /**
+   /**
    * To get Reference field ids.
-  */
+   */
 
   public function getTermReference($voc, $terms) {
     $vocName = strtolower($voc);
-    $vid  = preg_replace('@[^a-z0-9_]+@','_',$vocName);
-    $vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
-   
-    /** Create Vocabulary if it is not exists **/
+    $vid = preg_replace('@[^a-z0-9_]+@', '_', $vocName);
+    $vocabularies = Vocabulary::loadMultiple();   
+    /* Create Vocabulary if it is not exists */
     if (!isset($vocabularies[$vid])) {
-        ContentImport::createVoc($vid, $voc);       
+      ContentImport::createVoc($vid, $voc);       
     }
     $termArray = explode(',', $terms);
-    $termIds =[];
+    $termIds = [];
     foreach($termArray AS $term){            
        $term_id = ContentImport::getTermId($term, $vid);     
       if(empty($term_id)){
@@ -210,12 +209,11 @@ class ContentImport extends ConfigFormBase {
     $files = glob('sites/default/files/'.$contentType.'/images/*.*');
     $images = [];
     foreach ($files as $file_name) {
-      file_unmanaged_copy($file_name, 'sites/default/files/'.$contentType.'/images/' .basename($file_name));
-      $image = File::create(array('uri' => 'public://'.$contentType.'/images/'.basename($file_name)));
+      file_unmanaged_copy($file_name, 'sites/default/files/' . $contentType . '/images/' .basename($file_name));
+      $image = File::create(array('uri' => 'public://' . $contentType . '/images/' . basename($file_name)));
       $image->save();
       $images[basename($file_name)] = $image;   
-    }
-     
+    }     
     if($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv'){ //Code for import csv file
       if (($handle = fopen($location, "r")) !== FALSE) {
           $keyIndex = [];
@@ -241,8 +239,8 @@ class ContentImport extends ConfigFormBase {
    
             if(!isset($keyIndex['title']) || !isset($keyIndex['langcode'])){
               drupal_set_message($this->t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
-              $url = $base_url."/admin/config/content/contentimport";
-              header('Location:'.$url);
+              $url = $base_url . "/admin/config/content/contentimport";
+              header('Location:' . $url);
               exit;
             }
             for($f = 0 ; $f < count($fieldNames) ; $f++ ){
