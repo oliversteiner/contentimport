@@ -38,15 +38,15 @@ class ContentImport extends ConfigFormBase {
 
   /**
    * Content Import Form.
-  */
+   */
 
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $ContentTypes = ContentImportController::getAllContentTypes(); 
+    $contentTypes = ContentImportController::getAllContentTypes(); 
     $selected = 0;
     $form['contentimport_contenttype'] = [
       '#type' => 'select',
       '#title' => $this->t('Select Content Type'),
-      '#options' => $ContentTypes,
+      '#options' => $contentTypes,
       '#default_value' => $selected,
     ];  
 
@@ -57,13 +57,13 @@ class ContentImport extends ConfigFormBase {
       '#description' => $this->t('Select the CSV file to be imported. '),
       '#required' => FALSE,
       '#autoupload' => TRUE,
-      '#upload_validators' => array('file_validate_extensions' => array('csv'))
+      '#upload_validators' => ['file_validate_extensions' => ['csv']]
     ];
 
     $form['submit'] = [
-    '#type' => 'submit', 
-    '#value' => $this->t('Import'),
-    '#button_type' => 'primary',
+      '#type' => 'submit', 
+      '#value' => $this->t('Import'),
+      '#button_type' => 'primary',
     ];
 
     return parent::buildForm($form, $form_state);
@@ -97,8 +97,8 @@ class ContentImport extends ConfigFormBase {
   }
   
    /**
-   * To get Reference field ids.
-   */
+    * To get Reference field ids.
+    */
 
   public function getTermReference($voc, $terms) {
     $vocName = strtolower($voc);
@@ -122,7 +122,7 @@ class ContentImport extends ConfigFormBase {
 
   /**
    * To Create Terms if it is not available.
-  */
+   */
 
   public function createVoc($vid, $voc){
     $vocabulary = \Drupal\taxonomy\Entity\Vocabulary::create(array(
@@ -135,22 +135,21 @@ class ContentImport extends ConfigFormBase {
 
   /**
    * To Create Terms if it is not available.
-  */
+   */
 
   public function createTerm($voc, $term, $vid){
-    Term::create(array(
-        'parent' => array($voc),
-        'name' => $term,
-        'vid' => $vid,
-    ))->save();
+    Term::create([
+      'parent' => array($voc),
+      'name' => $term,
+      'vid' => $vid,
+    ])->save();
     $termId = ContentImport::getTermId($term, $vid);
     return $termId;
   }
 
-
   /**
    * To get Termid available.
-  */
+   */
 
   public function getTermId($term, $vid){
     $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', array(':uid' =>  $term, ':vid' => $vid));
@@ -161,37 +160,37 @@ class ContentImport extends ConfigFormBase {
   }
 
   /**
-   * To get user information based on emailIds
+   * To get user information based on emailIds.
    */
-  public static function getUserInfo($userArray) {
-      $uids = [];
-      foreach($userArray AS $usermail){
-        $users = \Drupal::entityTypeManager()->getStorage('user')
-        ->loadByProperties(['mail' => $usermail]);
-        $user = reset($users);
-        if ($user) {
-          $uids[] = $user->id();         
-        }else{
-          $user = \Drupal\user\Entity\User::create();
-          $user->uid = '';
-          $user->setUsername($usermail);
-          $user->setEmail($usermail);
-          $user->set("init", $usermail);
-          $user->enforceIsNew();
-          $user->activate();
-          $user->save();
 
-          $users = \Drupal::entityTypeManager()->getStorage('user')
-            ->loadByProperties(['mail' => $usermail]);
-          $uids[] = $user->id();
-        }
+  public static function getUserInfo($userArray) {
+    $uids = [];
+    foreach($userArray AS $usermail){
+      $users = \Drupal::entityTypeManager()->getStorage('user')
+      ->loadByProperties(['mail' => $usermail]);
+      $user = reset($users);
+      if ($user) {
+        $uids[] = $user->id();         
+      }else {
+        $user = \Drupal\user\Entity\User::create();
+        $user->uid = '';
+        $user->setUsername($usermail);
+        $user->setEmail($usermail);
+        $user->set("init", $usermail);
+        $user->enforceIsNew();
+        $user->activate();
+        $user->save();
+        $users = \Drupal::entityTypeManager()->getStorage('user')
+          ->loadByProperties(['mail' => $usermail]);
+        $uids[] = $user->id();
       }
+    }
     return $uids;   
   }
 
   /**
    * To import data as Content type nodes.
-  */
+   */
 
   public function createNode($contentType){
     global $base_url;  
