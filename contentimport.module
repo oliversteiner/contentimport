@@ -1,12 +1,16 @@
 <?php
+/**
+ * @File
+ * Content Import Module.
+ */
 
 /**
- * Implements hook_preprocess_page(). Used to add css and js library to content import page.
- * 
+ * Implements contentimport_preprocess_page(). 
+ * Used to add css and js library to content import page.
  */
 function contentimport_preprocess_page(&$variables) {
 	$variables['page']['#cache']['contexts'][] = 'route';
-	$urlRoute = \Drupal::routeMatch()->getRouteName();    
+	$urlRoute = \Drupal::routeMatch()->getRouteName();
 	if (($urlRoute == 'contentimport.admin_settings')) {
 		$variables['#attached']['library'][] = 'contentimport/common-styling';
 	}

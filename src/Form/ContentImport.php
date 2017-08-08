@@ -9,6 +9,7 @@ use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\user\Entity\User;
 
 /**
  * Configure Content Import settings for this site.
@@ -79,7 +80,6 @@ class ContentImport extends ConfigFormBase {
    * To get all Content Type Fields.
    */
   public function getFields($contentType) {
-    $entityManager = \Drupal::service('entity.manager');
     $fields = [];
     foreach (\Drupal::entityManager()
       ->getFieldDefinitions('node', $contentType) as $field_definition) {
@@ -119,7 +119,7 @@ class ContentImport extends ConfigFormBase {
    * To Create Terms if it is not available.
    */
   public function createVoc($vid, $voc) {
-    $vocabulary = \Drupal\taxonomy\Entity\Vocabulary::create([
+    $vocabulary = Vocabulary::create([
       'vid' => $vid,
       'machine_name' => $vid,
       'name' => $voc,
@@ -144,8 +144,8 @@ class ContentImport extends ConfigFormBase {
    * To get Termid available.
    */
   public function getTermId($term, $vid) {
-    $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', [':uid' =>  $term, ':vid' => $vid]);
-    foreach ($termRes as $val){
+    $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', [':uid' => $term, ':vid' => $vid]);
+    foreach ($termRes as $val) {
       $term_id = $val->tid;
     }
     return $term_id;
@@ -158,12 +158,14 @@ class ContentImport extends ConfigFormBase {
     $uids = [];
     foreach ($userArray as $usermail) {
       $users = \Drupal::entityTypeManager()->getStorage('user')
-      ->loadByProperties(['mail' => $usermail]);
+        ->loadByProperties([
+            'mail' => $usermail
+          ]);
       $user = reset($users);
       if ($user) {
         $uids[] = $user->id();
       }else {
-        $user = \Drupal\user\Entity\User::create();
+        $user = User::create();
         $user->uid = '';
         $user->setUsername($usermail);
         $user->setEmail($usermail);
@@ -196,7 +198,7 @@ class ContentImport extends ConfigFormBase {
     $files = glob('sites/default/files/' . $contentType . '/images/*.*');
     $images = [];
     foreach ($files as $file_name) {
-      file_unmanaged_copy($file_name, 'sites/default/files/' . $contentType . '/images/' .basename($file_name));
+      file_unmanaged_copy($file_name, 'sites/default/files/' . $contentType . '/images/' . basename($file_name));
       $image = File::create(['uri' => 'public://' . $contentType . '/images/' . basename($file_name)]);
       $image->save();
       $images[basename($file_name)] = $image;
