@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\contentimport\Form\ContentImport.
- */
-
 namespace Drupal\contentimport\Form;
 
 use Drupal\contentimport\Controller\ContentImportController;
@@ -56,9 +51,9 @@ class ContentImport extends ConfigFormBase {
 
     $form['file_upload'] = [
       '#type' => 'managed_file',
-      '#title' => t('Import CSV File'),
+      '#title' => $this->t('Import CSV File'),
       '#size' => 40,
-      '#description' => t('Select the CSV file to be imported. '),
+      '#description' => $this->t('Select the CSV file to be imported. '),
       '#required' => FALSE,
       '#autoupload' => TRUE,
       '#upload_validators' => array('file_validate_extensions' => array('csv'))
@@ -66,7 +61,7 @@ class ContentImport extends ConfigFormBase {
 
     $form['submit'] = [
     '#type' => 'submit', 
-    '#value' => t('Import'),
+    '#value' => $this->t('Import'),
     '#button_type' => 'primary',
     ];
 
@@ -199,7 +194,7 @@ class ContentImport extends ConfigFormBase {
    * To import data as Content type nodes.
   */
 
-  public function createNode($contentType){ 
+  public function createNode($contentType){
     global $base_url;  
     $loc = db_query('SELECT file_managed.uri FROM file_managed ORDER BY file_managed.fid DESC limit 1', array());
     foreach($loc as $val){
@@ -207,6 +202,8 @@ class ContentImport extends ConfigFormBase {
     }
     $mimetype = mime_content_type($location);
     $fields = ContentImport::getFields($contentType);
+
+    
     $fieldNames = $fields['name'];
     $fieldTypes = $fields['type'];
     $fieldSettings = $fields['setting'];
@@ -229,7 +226,7 @@ class ContentImport extends ConfigFormBase {
               array_push($fieldNames,'title');
               array_push($fieldTypes,'text');
               array_push($fieldNames,'langcode');
-              array_push($fieldTypes,'lang');
+              array_push($fieldTypes,'lang');            
               foreach($fieldNames AS $fieldValues){
                 $i = 0;
                 foreach($data AS $dataValues){
@@ -241,6 +238,7 @@ class ContentImport extends ConfigFormBase {
               }  
               continue;
             }
+   
             if(!isset($keyIndex['title']) || !isset($keyIndex['langcode'])){
               drupal_set_message(t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
               $url = $base_url."/admin/config/content/contentimport";
@@ -293,7 +291,7 @@ class ContentImport extends ConfigFormBase {
             $nodeArray['type'] = strtolower($contentType);
             $nodeArray['uid'] = 1;
             $nodeArray['promote'] = 0;
-            $nodeArray['sticky'] = 0;            
+            $nodeArray['sticky'] = 0;   
             if($nodeArray['title']['value'] != ''){
               $node = Node::create($nodeArray);
               $node->save();
