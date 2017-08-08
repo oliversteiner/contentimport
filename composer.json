@@ -1,14 +1,18 @@
 {
-    "name": "drupal/contentimport",
-    "description": "The simple drupal module to import data from CSV to any contenttype",
-    "type": "drupal-module",
-    "homepage": "https://drupal.org/project/contentimport",
-    "authors": [
-        {
-            "name": "Dhayanandan",
-            "homepage": "https://www.drupal.org/u/dhayanandan_k",
-            "role": "Maintainer"
-        },        
-    ],
-    "minimum-stability": "dev",
+  "type": "package",
+  "package" : {
+	  "name": "drupal/contentimport",
+	  "description": "The simple drupal module to import data from CSV to any contenttype",
+	  "type": "drupal-module",
+	  "homepage": "https://drupal.org/project/contentimport",
+	  "authors": [
+	      {
+	          "name": "Dhayanandan",
+	          "homepage": "https://www.drupal.org/u/dhayanandan_k",
+	          "role": "Maintainer"
+	      },        
+	  ],
+	  "license": "GPL-2.0+",
+	  "minimum-stability": "dev",
+	}
 }
