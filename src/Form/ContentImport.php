@@ -128,12 +128,12 @@ class ContentImport extends ConfigFormBase {
    * To Create Terms if it is not available.
    */
 
-  public function createVoc($vid, $voc){
-    $vocabulary = \Drupal\taxonomy\Entity\Vocabulary::create(array(
+  public function createVoc($vid, $voc) {
+    $vocabulary = \Drupal\taxonomy\Entity\Vocabulary::create([
       'vid' => $vid,
       'machine_name' => $vid,
       'name' => $voc,
-    ));
+    ]);
     $vocabulary->save();
   }
 
@@ -141,9 +141,9 @@ class ContentImport extends ConfigFormBase {
    * To Create Terms if it is not available.
    */
 
-  public function createTerm($voc, $term, $vid){
+  public function createTerm($voc, $term, $vid) {
     Term::create([
-      'parent' => array($voc),
+      'parent' => [$voc],
       'name' => $term,
       'vid' => $vid,
     ])->save();
@@ -155,8 +155,8 @@ class ContentImport extends ConfigFormBase {
    * To get Termid available.
    */
 
-  public function getTermId($term, $vid){
-    $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', array(':uid' =>  $term, ':vid' => $vid));
+  public function getTermId($term, $vid) {
+    $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', [':uid' =>  $term, ':vid' => $vid]);
     foreach($termRes as $val){
       $term_id = $val->tid;
     }
@@ -196,10 +196,10 @@ class ContentImport extends ConfigFormBase {
    * To import data as Content type nodes.
    */
 
-  public function createNode($contentType){
+  public function createNode($contentType) {
     global $base_url;
-    $loc = db_query('SELECT file_managed.uri FROM file_managed ORDER BY file_managed.fid DESC limit 1', array());
-    foreach($loc as $val){
+    $loc = db_query('SELECT file_managed.uri FROM file_managed ORDER BY file_managed.fid DESC limit 1', []);
+    foreach($loc as $val) {
       $location = $val->uri; // To get location of the csv file imported
     }
     $mimetype = mime_content_type($location);
@@ -229,10 +229,10 @@ class ContentImport extends ConfigFormBase {
             array_push($fieldTypes, 'text');
             array_push($fieldNames, 'langcode');
             array_push($fieldTypes, 'lang');   
-            foreach($fieldNames AS $fieldValues){
+            foreach ($fieldNames as $fieldValues) {
               $i = 0;
-              foreach($data AS $dataValues){
-                if($fieldValues == $dataValues){
+              foreach ($data as $dataValues) {
+                if ($fieldValues == $dataValues) {
                   $keyIndex[$fieldValues] = $i;
                 }
                 $i++;
@@ -240,32 +240,32 @@ class ContentImport extends ConfigFormBase {
             }
             continue;
           }
-          if(!isset($keyIndex['title']) || !isset($keyIndex['langcode'])){
+          if (!isset($keyIndex['title']) || !isset($keyIndex['langcode'])) {
             drupal_set_message($this->t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
             $url = $base_url . "/admin/config/content/contentimport";
             header('Location:' . $url);
             exit;
           }
-          for($f = 0 ; $f < count($fieldNames) ; $f++ ){
+          for($f = 0; $f < count($fieldNames); $f++) {
             switch($fieldTypes[$f]) {
               case 'image':                 
                 if (!empty($images[$data[$keyIndex[$fieldNames[$f]]]])) {
-                  $nodeArray[$fieldNames[$f]] = array(array('target_id' => $images[$data[$keyIndex[$fieldNames[$f]]]]->id()));
+                  $nodeArray[$fieldNames[$f]] = [['target_id' => $images[$data[$keyIndex[$fieldNames[$f]]]]->id()]];
                 }
                 break;
 
               case 'entity_reference':
-                  if ($fieldSettings[$f]['target_type'] == 'taxonomy_term') {
-                    $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);                
-                    if(is_array($reference) && $reference[0] != ''){
-                      $terms = ContentImport::getTermReference($reference[0], $reference[1]);          
-                      $nodeArray[$fieldNames[$f]] = $terms;
-                    }
-                  }elseif ($fieldSettings[$f]['target_type'] == 'user') {
+                if ($fieldSettings[$f]['target_type'] == 'taxonomy_term') {
+                  $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);     
+                  if (is_array($reference) && $reference[0] != '') {
+                    $terms = ContentImport::getTermReference($reference[0], $reference[1]);          
+                    $nodeArray[$fieldNames[$f]] = $terms;
+                  }
+                }elseif ($fieldSettings[$f]['target_type'] == 'user') {
                     $userArray = explode(', ', $data[$keyIndex[$fieldNames[$f]]]);
                     $users = ContentImport::getUserInfo($userArray);
                     $nodeArray[$fieldNames[$f]] = $users;
-                  }
+                }
                 break;
 
               case 'text_with_summary':
@@ -289,7 +289,7 @@ class ContentImport extends ConfigFormBase {
                 break;
 
               case 'langcode':
-                $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] != '') ? $data[$keyIndex[$fieldNames[$f]]]: 'en';
+                $nodeArray[$fieldNames[$f]] = ($data[$keyIndex[$fieldNames[$f]]] != '') ? $data[$keyIndex[$fieldNames[$f]]] : 'en';
                 break;
 
               default:
@@ -302,10 +302,10 @@ class ContentImport extends ConfigFormBase {
           $nodeArray['uid'] = 1;
           $nodeArray['promote'] = 0;
           $nodeArray['sticky'] = 0;
-          if($nodeArray['title']['value'] != ''){
+          if ($nodeArray['title']['value'] != '') {
             $node = Node::create($nodeArray);
             $node->save();
-          }   
+          }
         }
         fclose($handle);
         $url = $base_url . "/admin/content";
