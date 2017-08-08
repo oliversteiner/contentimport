@@ -4,17 +4,11 @@ namespace Drupal\contentimport\Form;
 
 use Drupal\contentimport\Controller\ContentImportController;
 use Drupal\Core\Form\ConfigFormBase;
-use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Form\Form;
 use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
-use Drupal\file\FileInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\user\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure Content Import settings for this site.
@@ -112,7 +106,7 @@ class ContentImport extends ConfigFormBase {
     $termArray = explode(',', $terms);
     $termIds = [];
     foreach ($termArray as $term) {
-       $term_id = ContentImport::getTermId($term, $vid);
+      $term_id = ContentImport::getTermId($term, $vid);
       if (empty($term_id)) {
         $term_id = ContentImport::createTerm($voc, $term, $vid);
       }
@@ -239,7 +233,7 @@ class ContentImport extends ConfigFormBase {
           }
           for ($f = 0; $f < count($fieldNames); $f++) {
             switch ($fieldTypes[$f]) {
-              case 'image':          
+              case 'image':
                 if (!empty($images[$data[$keyIndex[$fieldNames[$f]]]])) {
                   $nodeArray[$fieldNames[$f]] = [['target_id' => $images[$data[$keyIndex[$fieldNames[$f]]]]->id()]];
                 }
@@ -247,12 +241,13 @@ class ContentImport extends ConfigFormBase {
 
               case 'entity_reference':
                 if ($fieldSettings[$f]['target_type'] == 'taxonomy_term') {
-                  $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);    
+                  $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);
                   if (is_array($reference) && $reference[0] != '') {
-                    $terms = ContentImport::getTermReference($reference[0], $reference[1]);    
+                    $terms = ContentImport::getTermReference($reference[0], $reference[1]);
                     $nodeArray[$fieldNames[$f]] = $terms;
                   }
-                }elseif ($fieldSettings[$f]['target_type'] == 'user') {
+                }
+                elseif ($fieldSettings[$f]['target_type'] == 'user') {
                   $userArray = explode(', ', $data[$keyIndex[$fieldNames[$f]]]);
                   $users = ContentImport::getUserInfo($userArray);
                   $nodeArray[$fieldNames[$f]] = $users;
