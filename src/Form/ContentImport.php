@@ -41,14 +41,14 @@ class ContentImport extends ConfigFormBase {
    */
 
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $contentTypes = ContentImportController::getAllContentTypes(); 
+    $contentTypes = ContentImportController::getAllContentTypes();
     $selected = 0;
     $form['contentimport_contenttype'] = [
       '#type' => 'select',
       '#title' => $this->t('Select Content Type'),
       '#options' => $contentTypes,
       '#default_value' => $selected,
-    ];  
+    ];
 
     $form['file_upload'] = [
       '#type' => 'managed_file',
@@ -99,7 +99,7 @@ class ContentImport extends ConfigFormBase {
     }
     return $fields;
   }
-  
+
    /**
     * To get Reference field ids.
     */
@@ -107,19 +107,19 @@ class ContentImport extends ConfigFormBase {
   public function getTermReference($voc, $terms) {
     $vocName = strtolower($voc);
     $vid = preg_replace('@[^a-z0-9_]+@', '_', $vocName);
-    $vocabularies = Vocabulary::loadMultiple();   
+    $vocabularies = Vocabulary::loadMultiple();
     /* Create Vocabulary if it is not exists */
     if (!isset($vocabularies[$vid])) {
-      ContentImport::createVoc($vid, $voc);       
+      ContentImport::createVoc($vid, $voc);   
     }
     $termArray = explode(',', $terms);
     $termIds = [];
-    foreach($termArray AS $term){            
-       $term_id = ContentImport::getTermId($term, $vid);     
-      if(empty($term_id)){
-        $term_id = ContentImport::createTerm($voc, $term, $vid);       
+    foreach($termArray AS $term){    
+       $term_id = ContentImport::getTermId($term, $vid);
+      if (empty($term_id)) {
+        $term_id = ContentImport::createTerm($voc, $term, $vid); 
       }
-      $termIds[]['target_id'] = $term_id;         
+      $termIds[]['target_id'] = $term_id;
     }
     return $termIds;
   }
@@ -134,7 +134,7 @@ class ContentImport extends ConfigFormBase {
       'machine_name' => $vid,
       'name' => $voc,
     ));
-    $vocabulary->save();    
+    $vocabulary->save();
   }
 
   /**
@@ -158,7 +158,7 @@ class ContentImport extends ConfigFormBase {
   public function getTermId($term, $vid){
     $termRes = db_query('SELECT n.tid FROM {taxonomy_term_field_data} n WHERE n.name  = :uid AND n.vid  = :vid', array(':uid' =>  $term, ':vid' => $vid));
     foreach($termRes as $val){
-      $term_id = $val->tid; 
+      $term_id = $val->tid;
     }
     return $term_id;
   }
@@ -174,7 +174,7 @@ class ContentImport extends ConfigFormBase {
       ->loadByProperties(['mail' => $usermail]);
       $user = reset($users);
       if ($user) {
-        $uids[] = $user->id();         
+        $uids[] = $user->id();   
       }else {
         $user = \Drupal\user\Entity\User::create();
         $user->uid = '';
@@ -189,7 +189,7 @@ class ContentImport extends ConfigFormBase {
         $uids[] = $user->id();
       }
     }
-    return $uids;   
+    return $uids;
   }
 
   /**
@@ -197,13 +197,13 @@ class ContentImport extends ConfigFormBase {
    */
 
   public function createNode($contentType){
-    global $base_url;  
+    global $base_url;
     $loc = db_query('SELECT file_managed.uri FROM file_managed ORDER BY file_managed.fid DESC limit 1', array());
     foreach($loc as $val){
       $location = $val->uri; // To get location of the csv file imported
     }
     $mimetype = mime_content_type($location);
-    $fields = ContentImport::getFields($contentType);    
+    $fields = ContentImport::getFields($contentType);
     $fieldNames = $fields['name'];
     $fieldTypes = $fields['type'];
     $fieldSettings = $fields['setting'];
@@ -215,10 +215,10 @@ class ContentImport extends ConfigFormBase {
       $image->save();
       $images[basename($file_name)] = $image;
     }
-    
+
     // Code for import csv file.
 
-    if ($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv') { 
+    if ($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv') {
       if (($handle = fopen($location, "r")) !== FALSE) {
         $keyIndex = [];
         $index = 0;
@@ -228,7 +228,7 @@ class ContentImport extends ConfigFormBase {
             array_push($fieldNames, 'title');
             array_push($fieldTypes, 'text');
             array_push($fieldNames, 'langcode');
-            array_push($fieldTypes, 'lang');            
+            array_push($fieldTypes, 'lang');   
             foreach($fieldNames AS $fieldValues){
               $i = 0;
               foreach($data AS $dataValues){
@@ -237,9 +237,9 @@ class ContentImport extends ConfigFormBase {
                 }
                 $i++;
               }
-            }  
+            }
             continue;
-          } 
+          }
           if(!isset($keyIndex['title']) || !isset($keyIndex['langcode'])){
             drupal_set_message($this->t('title or langcode is missing in CSV file. Please add these fields and import again'), 'error');
             $url = $base_url . "/admin/config/content/contentimport";
@@ -256,9 +256,9 @@ class ContentImport extends ConfigFormBase {
 
               case 'entity_reference':
                   if ($fieldSettings[$f]['target_type'] == 'taxonomy_term') {
-                    $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);                  
+                    $reference = explode(":", $data[$keyIndex[$fieldNames[$f]]]);                
                     if(is_array($reference) && $reference[0] != ''){
-                      $terms = ContentImport::getTermReference($reference[0], $reference[1]);                 
+                      $terms = ContentImport::getTermReference($reference[0], $reference[1]);          
                       $nodeArray[$fieldNames[$f]] = $terms;
                     }
                   }elseif ($fieldSettings[$f]['target_type'] == 'user') {
@@ -296,16 +296,16 @@ class ContentImport extends ConfigFormBase {
                 $nodeArray[$fieldNames[$f]] = $data[$keyIndex[$fieldNames[$f]]];
                 break;
 
-            }             
+            }
           }
           $nodeArray['type'] = strtolower($contentType);
           $nodeArray['uid'] = 1;
           $nodeArray['promote'] = 0;
-          $nodeArray['sticky'] = 0;   
+          $nodeArray['sticky'] = 0;
           if($nodeArray['title']['value'] != ''){
             $node = Node::create($nodeArray);
             $node->save();
-          }            
+          }   
         }
         fclose($handle);
         $url = $base_url . "/admin/content";
