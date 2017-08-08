@@ -22,13 +22,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ContentImport extends ConfigFormBase {
 
-  public function getFormID() {
+  public function getFormId() {
     return 'contentimport';
   }
 
   /**
    * {@inheritdoc}
-  */
+   */
 
   protected function getEditableConfigNames() {
     return [
@@ -54,20 +54,24 @@ class ContentImport extends ConfigFormBase {
       '#type' => 'managed_file',
       '#title' => $this->t('Import CSV File'),
       '#size' => 40,
-      '#description' => $this->t('Select the CSV file to be imported. '),
+      '#description' => $this->t('Select the CSV file to be imported.'),
       '#required' => FALSE,
       '#autoupload' => TRUE,
-      '#upload_validators' => ['file_validate_extensions' => ['csv']]
+      '#upload_validators' => ['file_validate_extensions' => ['csv']],
     ];
 
     $form['submit'] = [
-      '#type' => 'submit', 
+      '#type' => 'submit',
       '#value' => $this->t('Import'),
       '#button_type' => 'primary',
     ];
 
     return parent::buildForm($form, $form_state);
   }
+
+  /**
+  * Content Import Form Submission.
+  */
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $contentType = $form_state->getValue('contentimport_contenttype');
@@ -203,25 +207,28 @@ class ContentImport extends ConfigFormBase {
     $fieldNames = $fields['name'];
     $fieldTypes = $fields['type'];
     $fieldSettings = $fields['setting'];
-    $files = glob('sites/default/files/'.$contentType.'/images/*.*');
+    $files = glob('sites/default/files/' . $contentType . '/images/*.*');
     $images = [];
     foreach ($files as $file_name) {
       file_unmanaged_copy($file_name, 'sites/default/files/' . $contentType . '/images/' .basename($file_name));
-      $image = File::create(array('uri' => 'public://' . $contentType . '/images/' . basename($file_name)));
+      $image = File::create(['uri' => 'public://' . $contentType . '/images/' . basename($file_name)]);
       $image->save();
-      $images[basename($file_name)] = $image;   
-    }     
-    if($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv'){ //Code for import csv file
+      $images[basename($file_name)] = $image;
+    }
+    
+    // Code for import csv file.
+
+    if ($mimetype == "text/plain" || $mimetype == 'text/x-pascal' || $mimetype == 'text/csv') { 
       if (($handle = fopen($location, "r")) !== FALSE) {
         $keyIndex = [];
         $index = 0;
         while (($data = fgetcsv($handle)) !== FALSE) {
           $index++;
           if ($index < 2) {
-            array_push($fieldNames,'title');
-            array_push($fieldTypes,'text');
-            array_push($fieldNames,'langcode');
-            array_push($fieldTypes,'lang');            
+            array_push($fieldNames, 'title');
+            array_push($fieldTypes, 'text');
+            array_push($fieldNames, 'langcode');
+            array_push($fieldTypes, 'lang');            
             foreach($fieldNames AS $fieldValues){
               $i = 0;
               foreach($data AS $dataValues){
