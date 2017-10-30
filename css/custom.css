@@ -1,3 +1,25 @@
 #edit-actions {
   display: none;
 }
+.content-import-columnnames {
+  border: solid 1px silver;
+  padding: 10px;
+  margin-top: 20px;
+  position: relative;
+  display: inline-block;
+}
+#edit-ajax-container-columnnames li {
+  list-style: none;
+  font-family: monospace;
+  font-size: 1.3em;
+  line-height: 1.4em;
+}
+#edit-ajax-container-download-link {
+  margin-top: 20px;
+}
+#show-csv-columns-trigger label {
+  cursor: pointer;
+}
+#show-csv-columns-trigger:hover {
+  color: #0074bd;
+}

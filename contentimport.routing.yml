@@ -6,4 +6,19 @@ contentimport.admin_settings:
   requirements:
     _permission: 'administer site configuration'
 
-    
+contentimport.downloadCsvTemplate:
+  path: '/admin/config/content/contentimport/download/{contentType}'
+  defaults:
+    _controller: 'Drupal\contentimport\Controller\ExportController::generateCsvFile'
+    contentType: null
+  requirements:
+    _permission: 'administer site configuration'
+
+contentimport.downloadCsvTemplate.test:
+  path: '/admin/config/content/contentimport/test'
+  defaults:
+    _controller: 'Drupal\contentimport\Controller\ExportController::generateCsvFile'
+    contentType: 'test'
+    test: true
+  requirements:
+    _permission: 'administer site configuration'

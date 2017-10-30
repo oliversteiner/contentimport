@@ -1,24 +1,27 @@
 <?php
 
-namespace Drupal\contentimport\Controller;
+  namespace Drupal\contentimport\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
-
-/**
- * Controller routines for contentimport routes.
- */
-class ContentImportController extends ControllerBase {
+  use Drupal\Core\Controller\ControllerBase;
 
   /**
-   * Get All Content types.
+   * Controller routines for contentimport routes.
    */
-  public static function getAllContentTypes() {
-    $contentTypes = \Drupal::service('entity.manager')->getStorage('node_type')->loadMultiple();
-    $contentTypesList = [];
-    foreach ($contentTypes as $contentType) {
-      $contentTypesList[$contentType->id()] = $contentType->label();
-    }
-    return $contentTypesList;
-  }
+  class ContentImportController extends ControllerBase {
 
-}
+    /**
+     * Get All Content types.
+     */
+    public static function getAllContentTypes() {
+      $contentTypes = \Drupal::service('entity.manager')
+        ->getStorage('node_type')
+        ->loadMultiple();
+      $contentTypesList = [];
+      foreach ($contentTypes as $contentType) {
+        $contentTypesList[$contentType->id()] = $contentType->label();
+      }
+      return $contentTypesList;
+    }
+
+
+  }
