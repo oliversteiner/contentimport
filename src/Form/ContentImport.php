@@ -408,11 +408,11 @@
                   ];
                   break;
 
-                case 'datetime':
+/*                case 'datetime':
                   $dateTime = \DateTime::createFromFormat('Y-m-d h:i:s', $data[$keyIndex[$fieldNames[$f]]]);
                   $newDateString = $dateTime->format('Y-m-d\Th:i:s');
                   $nodeArray[$fieldNames[$f]] = ["value" => $newDateString];
-                  break;
+                  break;*/
 
                 case 'timestamp':
                   $nodeArray[$fieldNames[$f]] = ["value" => $data[$keyIndex[$fieldNames[$f]]]];
